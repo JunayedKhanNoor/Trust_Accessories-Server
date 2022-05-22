@@ -71,6 +71,11 @@ async function run() {
           const users = await userCollection.find().toArray();
           res.send(users);
       })
+      //get all Accessories
+      app.get("/accessories", async(req,res)=>{
+          const accessories = await accessoriesCollection.find().toArray();
+          res.send(accessories);
+      })
   } finally {
   }
 }
