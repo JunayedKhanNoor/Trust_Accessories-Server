@@ -44,6 +44,7 @@ async function run() {
           res.status(403).send({ message: "Forbidden access" });
         }
       };
+      //Add User to DB
       app.put("/user/:email", async (req, res) => {
         const email = req.params.email;
         const user = req.body;
@@ -58,12 +59,18 @@ async function run() {
         });
         res.send({ result, token });
       });
+      //isAdmin?
       app.get("/admin/:email", async (req, res) => {
         const email = req.params.email;
         const user = await userCollection.findOne({ email: email });
         const isAdmin = user.role === "admin";
         res.send({ admin: isAdmin });
       });
+      //get users
+      app.get("user", verifyJWT, async(req,res)=>{
+          const users = await userCollection.find().toArray();
+          res.send(users);
+      })
   } finally {
   }
 }
