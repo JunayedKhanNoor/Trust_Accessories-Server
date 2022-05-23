@@ -71,7 +71,7 @@ async function run() {
         const updateDoc = {
           $set:{role: "admin"},
         };
-        const result = userCollection.updateOne(filter, updateDoc);
+        const result = await userCollection.updateOne(filter, updateDoc);
         res.send(result);
       })
        //isAdmin?
@@ -99,9 +99,8 @@ async function run() {
       const filter = {_id: ObjectId(id)};
       const accessory = await accessoriesCollection.findOne(filter);
       const order = req.body;
-      const query = {name:order.name, minOrder: { $lte: order.quantity }, quantity: { $gte: order.quantity }  }
-      const exist = await accessoriesCollection.findOne(query);
-      if (exist) {
+      //const query = {name:order.name, minOrder: { $gte: order.quantity }, quantity: { $gte: order.quantity }  }
+      //const exist = await accessoriesCollection.findOne(query);
         const result = await ordersCollection.insertOne(order);
         const available = accessory.quantity-order.quantity;
         const updateDoc = {
@@ -111,8 +110,10 @@ async function run() {
         };
         const updatedAccessory = await accessoriesCollection.updateOne(filter, updateDoc);
         return res.send({ success: true, result,  updatedAccessory});
-      }
-      return res.send({ success: false, order: "Invalid Quantity" });
+      // if (exist) {
+      //   return res.send({ success: false, order: "Invalid Quantity" });
+      // }
+      
     });
   } finally {
   }
