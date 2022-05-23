@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 const app = express();
@@ -76,6 +76,34 @@ async function run() {
           const accessories = await accessoriesCollection.find().toArray();
           res.send(accessories);
       })
+      //get single accessory
+      app.get("/accessory/:id", async(req,res)=>{
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const accessory = await accessoriesCollection.findOne(query);
+        res.send(accessory);
+    })
+    //set order and reduce quantity from stock
+    app.post("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = {_id: ObjectId(id)};
+      const accessory = await accessoriesCollection.findOne(filter);
+      const order = req.body;
+      const query = {name:order.name, minOrder: { $lte: order.quantity }, quantity: { $gte: order.quantity }  }
+      const exist = await accessoriesCollection.findOne(query);
+      if (exist) {
+        const result = await ordersCollection.insertOne(order);
+        const available = accessory.quantity-order.quantity;
+        const updateDoc = {
+          $set: {
+            quantity: available,
+          }
+        };
+        const updatedAccessory = await accessoriesCollection.updateOne(filter, updateDoc);
+        return res.send({ success: true, result,  updatedAccessory});
+      }
+      return res.send({ success: false, order: "Invalid Quantity" });
+    });
   } finally {
   }
 }
