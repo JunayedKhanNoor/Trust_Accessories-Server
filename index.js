@@ -91,13 +91,13 @@ async function run() {
       const accessories = await accessoriesCollection.find().toArray();
       res.send(accessories);
     });
-    //Page Count
-    app.get("/accessoriesCount", async (req, res) => {
-      const count = await accessoriesCollection.estimatedDocumentCount();
+    //Page Count for all orders
+    app.get("/orderCount", async (req, res) => {
+      const count = await ordersCollection.estimatedDocumentCount();
       res.send({ count });
     });
     //get orders by page number
-    app.get("/accessoriesPage", async (req, res) => {
+    app.get("/ordersPage", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       const query = {};
@@ -117,7 +117,7 @@ async function run() {
     app.delete("/accessories/:id", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
-      const result = await doctorCollection.deleteOne(filter);
+      const result = await accessoriesCollection.deleteOne(filter);
       res.send(result);
     });
     //get single accessory
