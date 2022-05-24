@@ -91,6 +91,35 @@ async function run() {
       const accessories = await accessoriesCollection.find().toArray();
       res.send(accessories);
     });
+    //Page Count
+    app.get("/accessoriesCount", async (req, res) => {
+      const count = await accessoriesCollection.estimatedDocumentCount();
+      res.send({ count });
+    });
+    //get orders by page number
+    app.get("/accessoriesPage", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const query = {};
+      const cursor = ordersCollection.find(query);
+      let accessories;
+      if (page || size) {
+        accessories = await cursor
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+      } else {
+        accessories = await cursor.toArray();
+      }
+      res.send(accessories);
+    });
+    //delete Accessory
+    app.delete("/accessories/:id", verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await doctorCollection.deleteOne(filter);
+      res.send(result);
+    });
     //get single accessory
     app.get("/accessories/:id", async (req, res) => {
       const id = req.params.id;
@@ -110,6 +139,11 @@ async function run() {
       const filter = { _id: ObjectId(id) };
       const result = await accessoriesCollection.deleteOne(filter);
       res.send(result);
+    });
+    //get all orders for admin
+    app.get("/orders", verifyJWT,verifyAdmin, async (req, res) => {
+        const orders = await ordersCollection.find().toArray();
+        return res.send(orders);
     });
     //set order and reduce quantity from stock
     app.post("/order/:id", async (req, res) => {
@@ -132,6 +166,7 @@ async function run() {
       //   return res.send({ success: false, order: "Invalid Quantity" });
       // }
     });
+    
   } finally {
   }
 }
