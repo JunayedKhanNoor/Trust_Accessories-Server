@@ -49,7 +49,7 @@ async function run() {
         res.status(403).send({ message: "Forbidden access" });
       }
     };
-    //Add User to DB
+    //Add User to DB and Issue Token
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const user = req.body;
@@ -63,6 +63,25 @@ async function run() {
         expiresIn: "1d",
       });
       res.send({ result, token });
+    });
+    //get single user
+    app.get("/userProfile/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+    //update user profile
+    app.put("/userProfile/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
     //get users
     app.get("/user", verifyJWT, async (req, res) => {
@@ -139,6 +158,18 @@ async function run() {
       const filter = { _id: ObjectId(id) };
       const result = await accessoriesCollection.deleteOne(filter);
       res.send(result);
+    });
+    //update Accessory to DB
+    app.put("/accessories/:id",verifyJWT,verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const accessory = req.body;
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: accessory,
+      };
+      const result = await accessoriesCollection.updateOne(filter, updateDoc, options);
+      res.send({ result, success:true });
     });
     //get all orders for admin
     app.get("/orders", verifyJWT,verifyAdmin, async (req, res) => {
