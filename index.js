@@ -40,6 +40,7 @@ async function run() {
     const ordersCollection = client.db("trust_accessories").collection("orders");
     const userCollection = client.db("trust_accessories").collection("users");
     const paymentCollection = client.db("trust_accessories").collection("payments");
+    const reviewCollection = client.db("trust_accessories").collection("reviews");
 
     const verifyAdmin = async (req, res, next) => {
       const requester = req.decoded.email;
@@ -274,6 +275,27 @@ async function run() {
       };
       const updatedOrder = await ordersCollection.updateOne(filter, updateDoc);
       res.send(updateDoc);
+    });
+    //add review
+     app.post("/review", verifyJWT, async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send({result,success:true});
+    });
+    //get reviews
+     app.get("/review", async (req, res) => {
+      const count = await reviewCollection.estimatedDocumentCount();
+      const cursor = ordersCollection.find();
+      let reviews;
+      if (count>6) {
+        reviews = await cursor
+          .skip(count - 6)
+          .limit(6)
+          .toArray();
+      } else {
+        reviews = await cursor.toArray();
+      }
+      res.send(reviews);
     });
   } finally {
   }
