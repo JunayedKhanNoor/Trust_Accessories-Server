@@ -285,7 +285,7 @@ async function run() {
     //get reviews
      app.get("/review", async (req, res) => {
       const count = await reviewCollection.estimatedDocumentCount();
-      const cursor = ordersCollection.find();
+      const cursor = reviewCollection.find();
       let reviews;
       if (count>6) {
         reviews = await cursor
