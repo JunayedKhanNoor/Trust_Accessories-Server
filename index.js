@@ -209,6 +209,13 @@ async function run() {
         return res.status(403).send({ message: "Forbidden access" });
       }
     });
+    //get Single order
+    app.get("/order/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const order = await ordersCollection.findOne(query);
+      res.send(order);
+    });
     //Delete User Order
      app.delete("/myOrders", verifyJWT, async (req, res) => {
       const orderId = req.query.orderId;
