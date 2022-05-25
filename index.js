@@ -185,7 +185,7 @@ async function run() {
       //const query = {name:order.name, minOrder: { $gte: order.quantity }, quantity: { $gte: order.quantity }  }
       //const exist = await accessoriesCollection.findOne(query);
       const result = await ordersCollection.insertOne(order);
-      const available = accessory.quantity - order.quantity;
+      const available = Number(accessory.quantity) - Number(order.quantity);
       const updateDoc = {
         $set: {
           quantity: available,
@@ -196,6 +196,36 @@ async function run() {
       // if (exist) {
       //   return res.send({ success: false, order: "Invalid Quantity" });
       // }
+    });
+    //get User Orders
+    app.get("/myOrders", verifyJWT, async (req, res) => {
+      const customer = req.query.customer;
+      const decodedEmail = req.decoded.email;
+      if (customer === decodedEmail) {
+        const query = { email: customer };
+        const orders = await ordersCollection.find(query).toArray();
+        return res.send(orders);
+      } else {
+        return res.status(403).send({ message: "Forbidden access" });
+      }
+    });
+    //Delete User Order
+     app.delete("/myOrders", verifyJWT, async (req, res) => {
+      const orderId = req.query.orderId;
+      const accessoryId = req.query.accessoryId;
+      const filterOrder = { _id: ObjectId(orderId) };
+      const order = await ordersCollection.findOne(filterOrder);
+      const filterAccessory = { _id: ObjectId(accessoryId) };
+      const accessory = await accessoriesCollection.findOne(filterAccessory);
+      const available = Number(order.quantity)+Number(accessory.quantity);
+      const updateDoc = {
+        $set: {
+          quantity: available,
+        },
+      };
+      const updatedAccessory = await accessoriesCollection.updateOne(filterAccessory, updateDoc);
+      const result = await ordersCollection.deleteOne(filterOrder);
+      res.send({ success: true, result, updatedAccessory });
     });
   } finally {
   }
