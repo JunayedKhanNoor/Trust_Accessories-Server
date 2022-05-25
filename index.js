@@ -249,7 +249,7 @@ async function run() {
       const result = await ordersCollection.deleteOne(filterOrder);
       res.send({ success: true, result, updatedAccessory });
     });
-    app.patch("/order/:id", async (req, res) => {
+    app.patch("/order/:id",verifyJWT, async (req, res) => {
       const id = req.params.id;
       const payment = req.body;
       const filter = { _id: ObjectId(id) };
@@ -260,6 +260,18 @@ async function run() {
         }
       };
       const result = await paymentCollection.insertOne(payment);
+      const updatedOrder = await ordersCollection.updateOne(filter, updateDoc);
+      res.send(updateDoc);
+    });
+    //admin change Order status
+    app.patch("/orderStatus/:id",verifyJWT,verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: true,
+        }
+      };
       const updatedOrder = await ordersCollection.updateOne(filter, updateDoc);
       res.send(updateDoc);
     });
