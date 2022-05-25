@@ -78,10 +78,10 @@ async function run() {
       const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
-        $set: user,
+        $set: { address: user.address, contact: user.contact, education: user.education },
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
-      res.send(result);
+      res.send({result, success:true});
     });
     //get users
     app.get("/user", verifyJWT, async (req, res) => {
@@ -160,7 +160,7 @@ async function run() {
       res.send(result);
     });
     //update Accessory to DB
-    app.put("/accessories/:id",verifyJWT,verifyAdmin, async (req, res) => {
+    app.put("/accessories/:id", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const accessory = req.body;
@@ -169,12 +169,12 @@ async function run() {
         $set: accessory,
       };
       const result = await accessoriesCollection.updateOne(filter, updateDoc, options);
-      res.send({ result, success:true });
+      res.send({ result, success: true });
     });
     //get all orders for admin
-    app.get("/orders", verifyJWT,verifyAdmin, async (req, res) => {
-        const orders = await ordersCollection.find().toArray();
-        return res.send(orders);
+    app.get("/orders", verifyJWT, verifyAdmin, async (req, res) => {
+      const orders = await ordersCollection.find().toArray();
+      return res.send(orders);
     });
     //set order and reduce quantity from stock
     app.post("/order/:id", async (req, res) => {
@@ -197,7 +197,6 @@ async function run() {
       //   return res.send({ success: false, order: "Invalid Quantity" });
       // }
     });
-    
   } finally {
   }
 }
