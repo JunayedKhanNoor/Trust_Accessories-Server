@@ -249,20 +249,6 @@ async function run() {
       const result = await ordersCollection.deleteOne(filterOrder);
       res.send({ success: true, result, updatedAccessory });
     });
-    // app.patch('/booking/:id', verifyJWT, async(req,res)=>{
-    //   const id = req.params.id;
-    //   const payment = req.body;
-    //   const filter = {_id: ObjectId(id)};
-    //   const updateDoc = {
-    //     $set: {
-    //       paid: true,
-    //       transactionId: payment.transactionId,
-    //     }
-    //   };
-    //   const result = await paymentCollection.insertOne(payment);
-    //   const updatedBooking = await bookingCollection.updateOne(filter, updateDoc);
-    //   res.send(updateDoc);
-    // })
     app.patch("/order/:id", async (req, res) => {
       const id = req.params.id;
       const payment = req.body;
